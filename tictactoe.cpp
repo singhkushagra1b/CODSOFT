@@ -1,10 +1,9 @@
-
-//TIC-TAC-TOE Game
 #include <iostream>
 using namespace std;
 
 const int SIZE = 3;
 char board[SIZE][SIZE];
+char currentPlayer = 'X';
 
 void initializeBoard() {
     for(int i = 0; i < SIZE; ++i) {
@@ -24,7 +23,6 @@ void displayBoard() {
 }
 
 bool checkWin(char player) {
-    // Check rows, columns, and diagonals for win condition
     for(int i = 0; i < SIZE; ++i) {
         if(board[i][0] == player && board[i][1] == player && board[i][2] == player) return true;
         if(board[0][i] == player && board[1][i] == player && board[2][i] == player) return true;
@@ -46,20 +44,55 @@ bool checkDraw() {
 void makeMove(int row, int col, char player) {
     if(row >= 0 && row < SIZE && col >= 0 && col < SIZE && board[row][col] == '-') {
         board[row][col] = player;
+    } else {
+        cout << "Invalid move Please try again." << endl;
+    }
+}
+
+int getValidRow() {
+    int row;
+    do {
+        cout << "Enter your move (row): ";
+        cin >> row;
+    } while(row < 0 || row > 2);
+    return row;
+}
+
+int getValidCol() {
+    int col;
+    do {
+        cout << "Enter your move (column): ";
+        cin >> col;
+    } while(col < 0 || col > 2);
+    return col;
+}
+
+void makeComputerMove() {
+    // Simple AI: Choose the center first, then corners, then sides
+    int row, col;
+    bool placed = false;
+    while(!placed) {
+        row = rand() % SIZE;
+        col = rand() % SIZE;
+        if(board[row][col] == '-') {
+            board[row][col] = 'O';
+            placed = true;
+        }
     }
 }
 
 int main() {
-    char currentPlayer = 'X';
+    srand(time(0)); // Seed random number generator for AI moves
     initializeBoard();
 
     while(true) {
         displayBoard();
         int row, col;
         cout << "Player " << currentPlayer << ", enter your move (row column): ";
-        cin >> row >> col;
-
+        row = getValidRow();
+        col = getValidCol();
         makeMove(row, col, currentPlayer);
+
         if(checkWin(currentPlayer)) {
             cout << "Player " << currentPlayer << " wins!" << endl;
             break;
@@ -69,9 +102,18 @@ int main() {
         }
 
         currentPlayer = (currentPlayer == 'X')? 'O' : 'X'; // Switch player
+
+        // Computer makes a move if it's Player O's turn
+        if(currentPlayer == 'O') {
+            makeComputerMove();
+            if(checkWin('O')) {
+                cout << "Computer wins!" << endl;
+                break;
+            }
+        }
     }
 
-    cout << "Do you want to play again? (y/n): ";
+    cout << "Play again? (y/n): ";
     char playAgain;
     cin >> playAgain;
     if(playAgain == 'y' || playAgain == 'Y') {
